@@ -1,4 +1,4 @@
-#include "pico_atecc.h"
+#include "hal_pico_i2c.h"
 
 // Calculate CRC16-CCITT (0x8005) checksum (little-endian) taken from CryptoAuthLib
 void calc_crc16_ccitt(size_t length, const uint8_t *data, uint8_t *crc_le) {

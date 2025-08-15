@@ -50,8 +50,17 @@ This project is designed to interface the Microchip ATECC608A Cryptographic Co-p
     ```sh
     git submodule update --init --recursive
     ```
+   The script `scripts/install-pico-sdk.sh` can also be used to fetch and
+   configure the Pico SDK automatically, which is useful in testing
+   environments.
 
-3. Build the project:
+3. Install the GNU Arm toolchain:
+    ```sh
+    sudo apt-get update
+    sudo apt-get install -y gcc-arm-none-eabi
+    ```
+
+4. Build the project:
     ```sh
     mkdir build
     cd build
@@ -63,7 +72,7 @@ This project is designed to interface the Microchip ATECC608A Cryptographic Co-p
     cmake -DPICO_BOARD=pico2 ..
     ```
 
-4. Flash the firmware onto the Pico:
+5. Flash the firmware onto the Pico:
     - Hold the BOOTSEL button on the Pico and connect it to your PC.
     - Copy the generated `pico_atecc.uf2` file to the `RPI-RP2` USB drive.
 

@@ -50,6 +50,9 @@ This project is designed to interface the Microchip ATECC608A Cryptographic Co-p
     ```sh
     git submodule update --init --recursive
     ```
+   The script `scripts/install-pico-sdk.sh` can also be used to fetch and
+   configure the Pico SDK automatically, which is useful in testing
+   environments.
 
 3. Build the project:
     ```sh

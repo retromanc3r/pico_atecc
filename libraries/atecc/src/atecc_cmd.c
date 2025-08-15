@@ -119,6 +119,7 @@ bool generate_random_value(uint8_t length) {
         printf("%02X ", response[i]);
         if ((i + 1) % 16 == 0) printf("\n");
     }
+    return true;
 }
 
 /**

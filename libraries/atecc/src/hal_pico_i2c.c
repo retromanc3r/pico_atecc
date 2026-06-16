@@ -1,5 +1,6 @@
 #include "hal_pico_i2c.h"
 #include "hardware/i2c.h"
+#include "atecc_cmd.h"
 
 /** @brief Send a command to an ATECC device.
  *
@@ -111,7 +112,7 @@ bool receive_atecc_response(uint8_t *buffer, size_t length, bool full_response) 
  * @return true if the command is successfully sent, false otherwise.
  */
 bool send_idle_command() {
-    uint8_t idle_cmd = OP_IDLE; // Idle command op-code
+    uint8_t idle_cmd = ATCA_IDLE; // Idle command op-code
     int res = hal_i2c_send((uint8_t*)&idle_cmd, sizeof(idle_cmd));
     if (res != sizeof(idle_cmd)) {
         printf("❌ ERROR: Failed to send idle command! (Expected %d, got %d)\n", (int)sizeof(idle_cmd), res);

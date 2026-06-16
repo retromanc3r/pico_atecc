@@ -11,27 +11,27 @@
  */
 bool read_atecc_serial_number()
 {
-    uint8_t serial[9];
+    uint8_t serial[ATCA_SERIAL_NUM_SIZE];
     uint8_t last_response[2];
 
-    send_atecc_command(OP_READ, 0x00, 0x0000, NULL, 0);
+    send_atecc_command(ATCA_READ, 0x00, 0x0000, NULL, 0);
     sleep_ms(5);
     if (!receive_atecc_response(&serial[0], 4, true))
         return false;
 
-    send_atecc_command(OP_READ, 0x00, 0x0002, NULL, 0);
+    send_atecc_command(ATCA_READ, 0x00, 0x0002, NULL, 0);
     sleep_ms(5);
     if (!receive_atecc_response(&serial[4], 5, true))
         return false;
 
-    send_atecc_command(OP_READ, 0x00, 0x0003, NULL, 0);
+    send_atecc_command(ATCA_READ, 0x00, 0x0003, NULL, 0);
     sleep_ms(5);
     if (!receive_atecc_response(last_response, 2, false))
         return false;
     serial[8] = last_response[0];
 
     printf("🆔 Serial Number: ");
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < ATCA_SERIAL_NUM_SIZE; i++)
     {
         printf("%02X", serial[i]);
     }
@@ -71,7 +71,7 @@ uint64_t map_random_to_range(uint8_t *random_bytes, uint64_t min, uint64_t max) 
 void generate_random_number_in_range(uint64_t min, uint64_t max) {
     uint8_t response[35];
 
-    send_atecc_command(OP_RANDOM, 0x00, 0x0000, NULL, 0);
+    send_atecc_command(ATCA_RANDOM, 0x00, 0x0000, NULL, 0);
     sleep_ms(23);
 
     if (hal_i2c_receive(response, sizeof(response)) != (int)sizeof(response)) {
@@ -101,7 +101,8 @@ void generate_random_number_in_range(uint64_t min, uint64_t max) {
 bool generate_random_value(uint8_t length) {
     uint8_t response[35];
 
-    send_atecc_command(OP_RANDOM, 0x00, 0x0000, NULL, 0);
+    // Use the RANDOM_SEED_UPDATE command to generate random bytes
+    send_atecc_command(ATCA_RANDOM, RANDOM_SEED_UPDATE, 0x0000, NULL, 0);
     sleep_ms(23);
 
     if (hal_i2c_receive(response, sizeof(response)) != (int)sizeof(response)) {
@@ -137,7 +138,7 @@ bool compute_sha256_hash(const char *message) {
     uint8_t response[35];
 
     // Step 1: Start SHA computation
-    if (!send_atecc_command(OP_SHA, 0x00, 0x0000, NULL, 0)) {
+    if (!send_atecc_command(ATCA_SHA, 0x00, 0x0000, NULL, 0)) {
         printf("❌ ERROR: SHA Start command failed!\n");
         return false;
     }
@@ -145,7 +146,7 @@ bool compute_sha256_hash(const char *message) {
 
     // Step 2: Process full 64-byte blocks (SHA Update)
     while (message_len - offset >= 64) {
-        if (!send_atecc_command(OP_SHA, 0x01, 0x0000, (const uint8_t *)&message[offset], 64)) {
+        if (!send_atecc_command(ATCA_SHA, 0x01, 0x0000, (const uint8_t *)&message[offset], 64)) {
             printf("❌ ERROR: SHA Update command failed!\n");
             return false;
         }
@@ -154,7 +155,7 @@ bool compute_sha256_hash(const char *message) {
     }
 
     // Step 3: Process the final block (SHA End)
-    if (!send_atecc_command(OP_SHA, 0x02, message_len - offset, (const uint8_t *)&message[offset], message_len - offset)) {
+    if (!send_atecc_command(ATCA_SHA, 0x02, message_len - offset, (const uint8_t *)&message[offset], message_len - offset)) {
         printf("❌ ERROR: SHA End command failed!\n");
         return false;
     }
@@ -196,7 +197,7 @@ bool read_slot_config(uint8_t slot) {
     uint8_t response[4];
     printf("🔎 Checking Slot %d Configuration...\n", slot);
 
-    if (!send_atecc_command(OP_READ, 0x00, slot, NULL, 0)) {
+    if (!send_atecc_command(ATCA_READ, 0x00, slot, NULL, 0)) {
         printf("❌ ERROR: Failed to send slot config read command!\n");
         return false;
     }
@@ -227,7 +228,7 @@ bool read_config_zone() {
     printf("🔎 Reading Configuration Data...\n");
 
     for (uint8_t i = 0; i < TOTAL_READS; i++) {
-        if (!send_atecc_command(OP_READ, 0x00, i, NULL, 0)) {
+        if (!send_atecc_command(ATCA_READ, 0x00, i, NULL, 0)) {
             printf("❌ ERROR: Failed to send read command for index %d!\n", i);
             return false;
         }
@@ -273,7 +274,7 @@ bool check_lock_status() {
     uint8_t expected_address = 0x15;  // Correct address for lock bytes
 
     // 🔹 Send read command for lock status at word address 0x15
-    if (!send_atecc_command(OP_READ, 0x00, expected_address, NULL, 0)) {
+    if (!send_atecc_command(ATCA_READ, 0x00, expected_address, NULL, 0)) {
         printf("❌ ERROR: Failed to send lock status read command!\n");
         return false;
     }
